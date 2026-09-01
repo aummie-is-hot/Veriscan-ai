@@ -135,6 +135,6 @@ def generate_verdict():
         return jsonify({'error': f'Could not generate session summary: {error}'}), 502
 
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.environ.get('PORT', 5500)))
+    app.run(host='0.0.0.0', debug=False, port=int(os.environ.get('PORT', 5500)))
 
     
