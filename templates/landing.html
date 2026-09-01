@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="VeriScan AI turns behavioral, vocal, and facial signals into live telemetry.">
+	<title>VeriScan AI | Read the moment</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--ink: #f2f4f0;
+			--muted: #9aa7a2;
+			--line: rgba(242, 244, 240, 0.14);
+			--panel: rgba(22, 31, 31, 0.78);
+			--night: #0b1111;
+			--mint: #b9f5d0;
+			--mint-dark: #17362d;
+			--orange: #ff9c68;
+		}
+
+		* { box-sizing: border-box; }
+		html { scroll-behavior: smooth; }
+		body {
+			margin: 0;
+			color: var(--ink);
+			background: var(--night);
+			font-family: 'Manrope', sans-serif;
+			background-image: linear-gradient(135deg, rgba(39, 80, 66, 0.22), transparent 34%), radial-gradient(circle at 85% 8%, rgba(255, 156, 104, 0.13), transparent 25%);
+		}
+		a { color: inherit; text-decoration: none; }
+		.wrap { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+		.nav { display: flex; justify-content: space-between; align-items: center; padding: 28px 0; }
+		.brand { font-size: 0.9rem; letter-spacing: 0.17em; font-weight: 800; }
+		.brand span { color: var(--mint); }
+		.nav-link { color: var(--muted); font: 500 0.72rem 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+		.nav-link:hover { color: var(--ink); }
+		.hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 70px; align-items: end; padding: 92px 0 116px; }
+		.eyebrow { color: var(--mint); font: 500 0.7rem 'DM Mono', monospace; letter-spacing: 0.13em; text-transform: uppercase; }
+		h1 { max-width: 720px; margin: 18px 0 24px; font-size: clamp(3.4rem, 7vw, 6.8rem); line-height: 0.98; letter-spacing: -0.06em; }
+		.hero-copy { max-width: 510px; color: var(--muted); font-size: 1.05rem; line-height: 1.75; }
+		.button { display: inline-flex; align-items: center; gap: 12px; margin-top: 30px; padding: 15px 19px; border: 1px solid var(--mint); border-radius: 5px; color: #10211b; background: var(--mint); font-weight: 800; font-size: 0.8rem; }
+		.button::after { content: '->'; font: 500 1rem 'DM Mono', monospace; }
+		.button:hover { background: #d5f9df; transform: translateY(-2px); }
+		.signal-board { position: relative; min-height: 310px; padding: 25px; border: 1px solid var(--line); background: var(--panel); box-shadow: 0 24px 80px rgba(0,0,0,0.25); }
+		.board-label { display: flex; justify-content: space-between; color: var(--muted); font: 500 0.65rem 'DM Mono', monospace; letter-spacing: 0.1em; }
+		.live { color: var(--mint); }
+		.wave { display: flex; align-items: center; gap: 5px; height: 120px; margin: 30px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+		.wave i { width: 5px; height: var(--h); background: var(--mint); opacity: 0.8; }
+		.readout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+		.readout small { display: block; color: var(--muted); font: 0.65rem 'DM Mono', monospace; text-transform: uppercase; }
+		.readout strong { display: block; margin-top: 5px; font-size: 1.5rem; }
+		.section { padding: 28px 0 108px; }
+		.section-heading { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 22px; margin-bottom: 34px; }
+		h2 { margin: 0; font-size: 1.8rem; letter-spacing: -0.04em; }
+		.section-heading p { margin: 0; color: var(--muted); font: 0.7rem 'DM Mono', monospace; text-transform: uppercase; }
+		.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+		.card { min-height: 252px; padding: 25px; border: 1px solid var(--line); background: rgba(255,255,255,0.035); }
+		.card-number { color: var(--orange); font: 0.72rem 'DM Mono', monospace; }
+		.card h3 { margin: 58px 0 12px; font-size: 1.15rem; }
+		.card p { margin: 0; color: var(--muted); font-size: 0.9rem; line-height: 1.65; }
+		.roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+		.roadmap-item { min-height: 180px; padding: 23px; background: var(--night); }
+		.roadmap-item time { color: var(--orange); font: 0.68rem 'DM Mono', monospace; }
+		.roadmap-item h3 { margin: 38px 0 9px; font-size: 1rem; }
+		.roadmap-item p { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+		footer { border-top: 1px solid var(--line); padding: 42px 0 28px; color: var(--muted); font: 0.68rem 'DM Mono', monospace; }
+		.footer-inner { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 45px; }
+		.footer-brand { color: var(--ink); font: 800 .9rem 'Manrope', sans-serif; letter-spacing: .15em; }
+		.footer-brand span { color: var(--mint); }
+		.footer-copy { max-width: 250px; margin: 13px 0 0; line-height: 1.7; }
+		.footer-heading { margin: 0 0 13px; color: var(--ink); font-size: .66rem; letter-spacing: .1em; text-transform: uppercase; }
+		.footer-links { display: grid; gap: 9px; }
+		.footer-links a { width: fit-content; transition: color .2s ease; }
+		.footer-links a:hover { color: var(--mint); }
+		.footer-bottom { display: flex; justify-content: space-between; gap: 20px; margin-top: 38px; padding-top: 18px; border-top: 1px solid var(--line); line-height: 1.6; }
+		@media (max-width: 760px) {
+			.wrap { width: min(100% - 32px, 560px); }
+			.hero { grid-template-columns: 1fr; gap: 48px; padding: 70px 0 82px; }
+			h1 { font-size: clamp(3.2rem, 17vw, 5rem); }
+			.cards, .roadmap { grid-template-columns: 1fr; }
+			.card { min-height: 210px; }
+			.card h3 { margin-top: 40px; }
+			.section { padding-bottom: 76px; }
+			.section-heading { display: block; }
+			.section-heading p { margin-top: 10px; }
+			.footer-inner { grid-template-columns: 1fr; gap: 25px; }
+			.footer-bottom { display: block; margin-top: 25px; }
+			.footer-bottom span { display: block; }
+			.footer-bottom span + span { margin-top: 8px; }
+		}
+		/* Skeuomorphic surface treatment */
+		body { background-color: var(--night); background-image: radial-gradient(circle at 15% 8%, rgba(255,255,255,.08), transparent 28%), repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0, rgba(255,255,255,.018) 1px, transparent 1px, transparent 4px); }
+		.nav { border-bottom: 1px solid var(--line); box-shadow: 0 1px 0 rgba(255,255,255,.05); }
+		.brand, .nav-link, h1, h2, h3, .readout strong { text-shadow: 0 1px 0 rgba(255,255,255,.08); }
+		.button { border-color: rgba(0,0,0,.4); border-radius: 9px; background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 88%, white), var(--mint)); box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -2px 0 rgba(0,0,0,.18), 0 4px 0 rgba(0,0,0,.3), 0 10px 22px rgba(0,0,0,.22); text-shadow: 0 1px 0 rgba(255,255,255,.35); transition: transform .15s ease, box-shadow .15s ease; }
+		.button:hover { background: linear-gradient(180deg, color-mix(in srgb, var(--mint) 96%, white), var(--mint)); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 0 rgba(0,0,0,.18), 0 5px 0 rgba(0,0,0,.3), 0 12px 24px rgba(0,0,0,.28); }
+		.button:active { transform: translateY(3px); box-shadow: inset 0 2px 5px rgba(0,0,0,.26), 0 1px 0 rgba(0,0,0,.3); }
+		.signal-board, .card, .roadmap { border-radius: 14px; border-color: rgba(255,255,255,.2); background: linear-gradient(145deg, rgba(255,255,255,.09), rgba(0,0,0,.12)); box-shadow: inset 1px 1px 0 rgba(255,255,255,.1), inset -2px -2px 0 rgba(0,0,0,.2), 0 12px 25px rgba(0,0,0,.25); }
+		.card { border-radius: 11px; }
+		.roadmap { overflow: hidden; }
+		.roadmap-item { background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(0,0,0,.12)); }
+		.wave { box-shadow: inset 0 3px 8px rgba(0,0,0,.18), inset 0 -1px 0 rgba(255,255,255,.08); background: rgba(0,0,0,.12); }
+		footer { box-shadow: 0 -1px 0 rgba(255,255,255,.05); }
+	</style>
+</head>
+<body>
+	<header class="wrap nav">
+		<a class="brand" href="{{ url_for('landing') }}">VERISCAN <span>AI</span></a>
+		<a class="nav-link" href="#roadmap">What's next +</a>
+	</header>
+
+	<main>
+		<section class="wrap hero">
+			<div>
+				<div class="eyebrow">Behavioral intelligence / 01</div>
+				<h1>Read the moment, in real time.</h1>
+				<p class="hero-copy">VeriScan AI turns subtle movement, vocal tone, and facial signals into a clear live picture of human behavior.</p>
+				<a class="button" href="{{ url_for('index') }}">Open live telemetry</a>
+			</div>
+			<div class="signal-board" aria-label="Sample live telemetry readout">
+				<div class="board-label"><span>LIVE SIGNAL / SAMPLE</span><span class="live">● ACTIVE</span></div>
+				<div class="wave" aria-hidden="true">
+					<i style="--h: 28%"></i><i style="--h: 54%"></i><i style="--h: 42%"></i><i style="--h: 78%"></i><i style="--h: 35%"></i><i style="--h: 62%"></i><i style="--h: 90%"></i><i style="--h: 47%"></i><i style="--h: 70%"></i><i style="--h: 33%"></i><i style="--h: 58%"></i><i style="--h: 44%"></i><i style="--h: 82%"></i><i style="--h: 30%"></i><i style="--h: 64%"></i><i style="--h: 48%"></i><i style="--h: 73%"></i><i style="--h: 38%"></i><i style="--h: 57%"></i><i style="--h: 26%"></i><i style="--h: 68%"></i><i style="--h: 45%"></i><i style="--h: 84%"></i><i style="--h: 36%"></i><i style="--h: 60%"></i>
+				</div>
+				<div class="readout"><div><small>Stress index</small><strong>12.4%</strong></div><div><small>Vocal tone</small><strong>Neutral</strong></div></div>
+			</div>
+		</section>
+
+		<section class="wrap section">
+			<div class="section-heading"><h2>One lens. Many signals.</h2><p>Built for a fuller read</p></div>
+			<div class="cards">
+				<article class="card"><span class="card-number">01 / VISION</span><h3>Movement, made legible.</h3><p>MediaPipe-powered posture and gesture tracking surfaces shifts as they happen, without losing the human context.</p></article>
+				<article class="card"><span class="card-number">02 / VOICE</span><h3>Hear what changes.</h3><p>Live pitch, volume, and speech transcription create a richer read on vocal energy and its patterns over time.</p></article>
+				<article class="card"><span class="card-number">03 / INSIGHT</span><h3>Signals, in one place.</h3><p>A focused telemetry dashboard brings stress, fidgeting, facial action units, and AI assistance into a single view.</p></article>
+			</div>
+		</section>
+
+		<section id="roadmap" class="wrap section">
+			<div class="section-heading"><h2>On the horizon.</h2><p>Upcoming features</p></div>
+			<div class="roadmap">
+				<article class="roadmap-item"><time>SOON / 01</time><h3>Session replay</h3><p>Review signal changes across a conversation with a synchronized visual timeline.</p></article>
+				<article class="roadmap-item"><time>SOON / 02</time><h3>Personal baselines</h3><p>Calibrate insights against each user’s natural patterns for more useful context.</p></article>
+				<article class="roadmap-item"><time>SOON / 03</time><h3>Shareable reports</h3><p>Turn a session into a concise, exportable summary for thoughtful follow-up.</p></article>
+			</div>
+		</section>
+	</main>
+
+	<footer>
+		<div class="wrap footer-inner">
+			<div>
+				<div class="footer-brand">VERISCAN <span>AI</span></div>
+				<p class="footer-copy">A clearer view of the signals shaping every conversation.</p>
+			</div>
+			<div>
+				<p class="footer-heading">Explore</p>
+				<nav class="footer-links" aria-label="Footer navigation">
+					<a href="{{ url_for('index') }}">Live dashboard</a>
+					<a href="{{ url_for('assistant') }}">AI assistant</a>
+					<a href="{{ url_for('upload') }}">Video analysis</a>
+				</nav>
+			</div>
+			<div>
+				<p class="footer-heading">Workspace</p>
+				<nav class="footer-links" aria-label="Workspace navigation">
+					<a href="{{ url_for('settings') }}">Settings</a>
+					<a href="#roadmap">Upcoming features</a>
+				</nav>
+			</div>
+		</div>
+		<div class="wrap footer-bottom"><span>VERISCAN AI / BEHAVIORAL TELEMETRY</span><span>Read clearly. Respond thoughtfully.</span></div>
+	</footer>
+	<script src="/static/sidepanel.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Assistant | VeriScan AI</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root { --bg: #090d16; --panel: rgba(22,30,46,.82); --line: rgba(255,255,255,.1); --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; }
+		* { box-sizing: border-box; }
+		body { min-height: 100vh; margin: 0; padding: 30px; color: var(--text); background: var(--bg); background-image: radial-gradient(circle at 60% 0%, rgba(56,189,248,.12), transparent 40%); font-family: 'Manrope', sans-serif; }
+		.assistant-page { width: min(850px, 100%); margin: 0 auto; }
+		.assistant-kicker { margin: 42px 0 13px; color: var(--accent); font: 500 .7rem 'DM Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+		h1 { margin: 0; font-size: clamp(2.3rem, 5vw, 4.3rem); letter-spacing: -.06em; }
+		.intro { max-width: 570px; margin: 18px 0 35px; color: var(--muted); line-height: 1.7; }
+		.chat-shell { display: flex; flex-direction: column; min-height: 570px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); backdrop-filter: blur(16px); box-shadow: 0 24px 60px rgba(0,0,0,.32); overflow: hidden; }
+		.chat-title { display: flex; justify-content: space-between; align-items: center; padding: 18px 22px; border-bottom: 1px solid var(--line); font: 500 .68rem 'DM Mono', monospace; letter-spacing: .1em; }
+		.chat-title span:last-child { color: #4ade80; }
+		.chat-body { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 24px; overflow-y: auto; }
+		.chat-msg { max-width: 78%; padding: 13px 16px; border-radius: 10px; line-height: 1.6; font-size: .9rem; }
+		.chat-msg.bot { align-self: flex-start; border: 1px solid var(--line); color: var(--text); background: rgba(255,255,255,.045); }
+		.chat-msg.user { align-self: flex-end; color: #07141b; background: var(--accent); font-weight: 600; }
+		.chat-form { display: flex; gap: 10px; padding: 16px; border-top: 1px solid var(--line); }
+		.chat-form input { min-width: 0; flex: 1; padding: 13px 15px; border: 1px solid var(--line); border-radius: 8px; outline: none; color: var(--text); background: rgba(0,0,0,.22); font: .85rem 'Manrope', sans-serif; }
+		.chat-form input:focus { border-color: var(--accent); }
+		.chat-form button { padding: 0 20px; border: 0; border-radius: 8px; color: #07141b; background: var(--accent); font-weight: 800; cursor: pointer; }
+		.chat-form button:hover { background: #7ddcff; }
+		@media (max-width: 760px) { body { padding: 24px 16px; } .assistant-kicker { margin-top: 22px; } .chat-shell { min-height: 500px; } .chat-form button { padding: 0 15px; } }
+		/* Skeuomorphic surface treatment */
+		body { background-image: radial-gradient(circle at 55% 0%, rgba(255,255,255,.08), transparent 36%), repeating-linear-gradient(0deg, rgba(255,255,255,.016) 0, rgba(255,255,255,.016) 1px, transparent 1px, transparent 4px); }
+		h1, .assistant-kicker { text-shadow: 0 1px 0 rgba(255,255,255,.08); }
+		.chat-shell { border-radius: 14px; background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(0,0,0,.14)); box-shadow: inset 1px 1px 0 rgba(255,255,255,.1), inset -2px -2px 0 rgba(0,0,0,.22), 0 20px 38px rgba(0,0,0,.35); }
+		.chat-title { background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(0,0,0,.1)); box-shadow: inset 0 1px 0 rgba(255,255,255,.1); }
+		.chat-msg { border-radius: 9px; box-shadow: inset 1px 1px 0 rgba(255,255,255,.06), inset -1px -1px 0 rgba(0,0,0,.18); }
+		.chat-form input { border-radius: 8px; box-shadow: inset 0 3px 7px rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.08); }
+		.chat-form button { border-radius: 8px; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.2), 0 3px 0 rgba(0,0,0,.3); }
+		.chat-form button:active { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0,0,0,.25), 0 1px 0 rgba(0,0,0,.3); }
+	</style>
+</head>
+<body>
+	<main class="assistant-page">
+		<div class="assistant-kicker">VeriScan intelligence / 02</div>
+		<h1>Ask the signal.</h1>
+		<p class="intro">Your dedicated VeriScan assistant can help interpret behavioral telemetry, vocal tone, posture shifts, and stress patterns from a session.</p>
+		<section class="chat-shell" aria-label="VeriScan Assistant">
+			<div class="chat-title"><span>VERISCAN ASSISTANT</span><span>● ONLINE</span></div>
+			<div id="chatBody" class="chat-body">
+				<div class="chat-msg bot">Hello. Ask me anything about the telemetry captured in your session.</div>
+			</div>
+			<form id="chatForm" class="chat-form">
+				<input id="chatInput" type="text" placeholder="Ask about your telemetry..." autocomplete="off">
+				<button type="submit">Send</button>
+			</form>
+		</section>
+	</main>
+	<script>
+		const chatBody = document.getElementById('chatBody');
+		const chatInput = document.getElementById('chatInput');
+		document.getElementById('chatForm').addEventListener('submit', async (event) => {
+			event.preventDefault();
+			const text = chatInput.value.trim();
+			if (!text) return;
+			const userMessage = document.createElement('div');
+			userMessage.className = 'chat-msg user';
+			userMessage.textContent = text;
+			chatBody.appendChild(userMessage);
+			chatInput.value = '';
+			const botMessage = document.createElement('div');
+			botMessage.className = 'chat-msg bot';
+			botMessage.textContent = 'Analyzing...';
+			chatBody.appendChild(botMessage);
+			chatBody.scrollTop = chatBody.scrollHeight;
+			try {
+				const response = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text }) });
+				const data = await response.json();
+				botMessage.textContent = data.reply || data.error || 'Error processing request.';
+			} catch (error) {
+				botMessage.textContent = 'Failed to connect to backend server.';
+			}
+			chatBody.scrollTop = chatBody.scrollHeight;
+		});
+	</script>
+	<script src="/static/sidepanel.js"></script>
+</body>
+</html>

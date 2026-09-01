@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Settings | VeriScan AI</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root { --bg: #090d16; --panel: rgba(22,30,46,.82); --line: rgba(255,255,255,.1); --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; }
+		* { box-sizing: border-box; }
+		body { min-height: 100vh; margin: 0; padding: 30px; color: var(--text); background: var(--bg); background-image: radial-gradient(circle at 55% 0%, rgba(56,189,248,.12), transparent 40%); font-family: 'Manrope', sans-serif; }
+		.settings-page { width: min(900px, 100%); margin: 0 auto; }
+		.kicker { margin: 35px 0 13px; color: var(--accent); font: 500 .7rem 'DM Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+		h1 { margin: 0; font-size: clamp(2.4rem, 5vw, 4.5rem); letter-spacing: -.06em; }
+		.lede { max-width: 620px; margin: 18px 0 36px; color: var(--muted); line-height: 1.7; }
+		.settings-card { margin-bottom: 18px; padding: 26px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(0,0,0,.14)); box-shadow: inset 1px 1px 0 rgba(255,255,255,.1), inset -2px -2px 0 rgba(0,0,0,.22), 0 20px 38px rgba(0,0,0,.3); }
+		h2 { margin: 0 0 7px; font-size: 1.15rem; } .card-copy { margin: 0 0 22px; color: var(--muted); font-size: .82rem; line-height: 1.6; }
+		.setting { padding: 18px 0; border-top: 1px solid var(--line); } .setting:first-of-type { border-top: 0; }
+		.setting-heading { display: flex; justify-content: space-between; gap: 15px; align-items: baseline; } .setting-heading label { font-weight: 700; font-size: .9rem; } output, .setting-value { color: var(--accent); font: 500 .75rem 'DM Mono', monospace; }
+		.setting-description { margin: 6px 0 13px; color: var(--muted); font-size: .75rem; line-height: 1.5; }
+		input[type="range"] { width: 100%; height: 8px; accent-color: var(--accent); cursor: pointer; } select { min-width: 170px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--text); background: rgba(0,0,0,.22); font: .8rem 'Manrope', sans-serif; }
+		.select-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; } .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+		.switch { position: relative; width: 43px; height: 24px; flex: 0 0 auto; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; inset: 0; border-radius: 20px; background: rgba(255,255,255,.16); cursor: pointer; box-shadow: inset 0 2px 4px rgba(0,0,0,.3); transition: .2s; } .slider:before { position: absolute; content: ''; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.35); transition: .2s; } input:checked + .slider { background: var(--accent); } input:checked + .slider:before { transform: translateX(19px); }
+		.notice { padding: 15px; border-left: 3px solid #ff9c68; color: var(--muted); background: rgba(255,156,104,.08); font-size: .75rem; line-height: 1.6; }
+		@media (max-width: 760px) { body { padding: 24px 16px; } .select-row, .toggle-row { align-items: flex-start; flex-direction: column; gap: 13px; } select { width: 100%; } }
+	</style>
+</head>
+<body>
+	<main class="settings-page">
+		<div class="kicker">VeriScan control room / 04</div>
+		<h1>Shape the signal.</h1>
+		<p class="lede">Tune how the live dashboard captures and weighs signals. Changes are saved on this device and apply the next time the dashboard opens.</p>
+		<section class="settings-card">
+			<h2>Interface design</h2><p class="card-copy">Choose the visual language used across the landing page, dashboard, assistant, and video analysis views.</p>
+			<div class="setting select-row"><div><div class="setting-heading"><label for="designSelect">Design theme</label></div><p class="setting-description">Skeuomorphic is the default. Changes appear across the app after navigation or refresh.</p></div><select id="designSelect"><option value="skeuo">Skeuomorphic</option><option value="glass">Glassmorphism</option><option value="jarvis">JARVIS Interface</option><option value="terminal">Terminal Green</option></select></div>
+		</section>
+		<section class="settings-card">
+			<h2>Stress sensitivity</h2><p class="card-copy">Adjust how much vocal volume and pitch contribute to the live stress cue estimate.</p>
+			<div class="setting"><div class="setting-heading"><label for="volumeSensitivity">Volume impact</label><output id="volumeSensitivityValue">3.0x</output></div><p class="setting-description">Controls the contribution of loudness-related cues.</p><input id="volumeSensitivity" type="range" min="0" max="6" step="0.1"></div>
+			<div class="setting"><div class="setting-heading"><label for="pitchSensitivity">Pitch impact</label><output id="pitchSensitivityValue">3.0x</output></div><p class="setting-description">Controls the contribution of pitch and vocal-tone cues.</p><input id="pitchSensitivity" type="range" min="0" max="6" step="0.1"></div>
+		</section>
+		<section class="settings-card">
+			<h2>Camera and visualization</h2><p class="card-copy">Choose capture behavior for the live MediaPipe feed. Lower settings can help reduce load on phones and older devices.</p>
+			<div class="setting toggle-row"><div><div class="setting-heading"><label for="facialMesh">Facial mesh visibility</label></div><p class="setting-description">Show or hide facial contour lines over the camera preview. Landmark analysis continues either way.</p></div><label class="switch"><input id="facialMesh" type="checkbox"><span class="slider"></span></label></div>
+			<div class="setting select-row"><div><div class="setting-heading"><label for="cameraFps">Camera frame-rate cap</label></div><p class="setting-description">Limit frames sent to the analyzer. Auto uses the camera’s normal cadence.</p></div><select id="cameraFps"><option value="0">Auto</option><option value="15">15 FPS</option><option value="24">24 FPS</option><option value="30">30 FPS</option></select></div>
+			<div class="setting select-row"><div><div class="setting-heading"><label for="cameraResolution">Camera resolution</label></div><p class="setting-description">Higher resolution can improve detail but uses more device resources.</p></div><select id="cameraResolution"><option value="640x480">Standard · 640 x 480</option><option value="1280x720">High · 1280 x 720</option></select></div>
+		</section>
+		<div id="settingsStatus" class="notice">Settings are saved automatically.</div>
+	</main>
+	<script>
+		const volume = document.getElementById('volumeSensitivity');
+		const pitch = document.getElementById('pitchSensitivity');
+		const facialMesh = document.getElementById('facialMesh');
+		const cameraFps = document.getElementById('cameraFps');
+		const cameraResolution = document.getElementById('cameraResolution');
+		const designSelect = document.getElementById('designSelect');
+		const status = document.getElementById('settingsStatus');
+		volume.value = localStorage.getItem('veriscan-volume-sensitivity') || '3';
+		pitch.value = localStorage.getItem('veriscan-pitch-sensitivity') || '3';
+		facialMesh.checked = localStorage.getItem('veriscan-facial-mesh') !== 'false';
+		cameraFps.value = localStorage.getItem('veriscan-camera-fps') || '0';
+		cameraResolution.value = localStorage.getItem('veriscan-camera-resolution') || '640x480';
+		designSelect.value = localStorage.getItem('veriscan-design') || 'skeuo';
+
+		function updateLabels() { document.getElementById('volumeSensitivityValue').textContent = `${Number(volume.value).toFixed(1)}x`; document.getElementById('pitchSensitivityValue').textContent = `${Number(pitch.value).toFixed(1)}x`; }
+		function save(key, value) { localStorage.setItem(key, value); status.textContent = 'Saved. Open the dashboard to apply camera changes.'; }
+		volume.addEventListener('input', () => { save('veriscan-volume-sensitivity', volume.value); updateLabels(); });
+		pitch.addEventListener('input', () => { save('veriscan-pitch-sensitivity', pitch.value); updateLabels(); });
+		facialMesh.addEventListener('change', () => save('veriscan-facial-mesh', facialMesh.checked));
+		cameraFps.addEventListener('change', () => save('veriscan-camera-fps', cameraFps.value));
+		cameraResolution.addEventListener('change', () => save('veriscan-camera-resolution', cameraResolution.value));
+		designSelect.addEventListener('change', () => { save('veriscan-design', designSelect.value); document.documentElement.dataset.design = designSelect.value; });
+		updateLabels();
+	</script>
+	<script src="/static/sidepanel.js"></script>
+</body>
+</html>

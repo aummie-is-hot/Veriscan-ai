@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Video Analysis | VeriScan AI</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root { --bg: #090d16; --panel: rgba(22,30,46,.82); --line: rgba(255,255,255,.1); --text: #f1f5f9; --muted: #94a3b8; --accent: #38bdf8; }
+		* { box-sizing: border-box; }
+		body { min-height: 100vh; margin: 0; padding: 30px; color: var(--text); background: var(--bg); background-image: radial-gradient(circle at 55% 0%, rgba(56,189,248,.12), transparent 40%); font-family: 'Manrope', sans-serif; }
+		.analysis-page { width: min(1000px, 100%); margin: 0 auto; }
+		.kicker { margin: 35px 0 13px; color: var(--accent); font: 500 .7rem 'DM Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+		h1 { margin: 0; font-size: clamp(2.3rem, 5vw, 4.5rem); letter-spacing: -.06em; }
+		.lede { max-width: 650px; margin: 18px 0 36px; color: var(--muted); line-height: 1.7; }
+		.upload-card, .results-card { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: inset 1px 1px 0 rgba(255,255,255,.1), inset -2px -2px 0 rgba(0,0,0,.22), 0 20px 38px rgba(0,0,0,.3); }
+		.upload-card { padding: 28px; }
+		.drop-zone { display: grid; place-items: center; min-height: 260px; padding: 28px; border: 1px dashed rgba(56,189,248,.65); border-radius: 10px; background: rgba(56,189,248,.045); text-align: center; transition: background .2s, border-color .2s; }
+		.drop-zone.dragging, .drop-zone:hover { border-color: var(--accent); background: rgba(56,189,248,.11); }
+		.drop-icon { display: grid; place-items: center; width: 55px; height: 55px; margin-bottom: 15px; border: 1px solid var(--accent); border-radius: 50%; color: var(--accent); font-size: 1.5rem; box-shadow: inset 0 2px 6px rgba(0,0,0,.2), 0 3px 0 rgba(0,0,0,.22); }
+		.drop-zone strong { font-size: 1rem; }
+		.drop-zone span { display: block; margin-top: 9px; color: var(--muted); font-size: .8rem; }
+		.file-name { min-height: 20px; margin: 14px 0 0; color: var(--accent); font: .72rem 'DM Mono', monospace; text-align: center; }
+		.actions { display: flex; justify-content: flex-end; gap: 12px; align-items: center; margin-top: 18px; }
+		button { border: 0; border-radius: 8px; padding: 13px 19px; color: #07141b; background: var(--accent); font-weight: 800; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 0 rgba(0,0,0,.2), 0 3px 0 rgba(0,0,0,.3); }
+		button:disabled { cursor: not-allowed; opacity: .5; }
+		button:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 2px 5px rgba(0,0,0,.25), 0 1px 0 rgba(0,0,0,.3); }
+		.status { margin: 0 auto 0 0; color: var(--muted); font: .7rem 'DM Mono', monospace; }
+		.status.error { color: #ff9a9a; }
+		.processing { display: none; margin-top: 22px; padding: 25px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(145deg, rgba(56,189,248,.12), rgba(0,0,0,.16)); box-shadow: inset 0 2px 8px rgba(0,0,0,.2); }
+		.processing.visible { display: block; }
+		.processing-top { display: flex; justify-content: space-between; gap: 20px; align-items: center; }
+		.processing-title { font-weight: 800; }
+		.processing-percent { color: var(--accent); font: 500 .75rem 'DM Mono', monospace; }
+		.processing-bar { height: 9px; margin-top: 18px; overflow: hidden; border-radius: 9px; background: rgba(0,0,0,.28); box-shadow: inset 0 2px 5px rgba(0,0,0,.3); }
+		.processing-fill { width: 4%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), #b9f5d0, var(--accent)); background-size: 200% 100%; box-shadow: 0 0 13px var(--accent); animation: scan 1.2s linear infinite; transition: width .5s ease; }
+		.processing-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 17px; color: var(--muted); font: .66rem 'DM Mono', monospace; }
+		.processing-step.active { color: var(--accent); }
+		.signal-pulse { display: flex; align-items: center; gap: 4px; height: 42px; margin-top: 17px; }
+		.signal-pulse i { width: 5px; height: 20%; border-radius: 4px; background: var(--accent); animation: pulse 1s ease-in-out infinite alternate; }
+		.signal-pulse i:nth-child(2n) { animation-delay: .15s; } .signal-pulse i:nth-child(3n) { animation-delay: .3s; }
+		@keyframes scan { to { background-position: 200% 0; } } @keyframes pulse { to { height: 100%; opacity: .45; } }
+		.results-card { display: none; margin-top: 22px; padding: 28px; }
+		.results-card.visible { display: block; }
+		.result-header { display: flex; justify-content: space-between; gap: 20px; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 17px; }
+		h2 { margin: 0; font-size: 1.25rem; }
+		.result-header span { color: var(--muted); font: .68rem 'DM Mono', monospace; }
+		.score-panel { display: grid; grid-template-columns: 150px 1fr; gap: 22px; align-items: center; margin-bottom: 27px; padding-bottom: 22px; border-bottom: 1px solid var(--line); }
+		.score-ring { display: grid; place-items: center; width: 140px; height: 140px; border-radius: 50%; background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.1) 0deg); box-shadow: inset 0 3px 8px rgba(0,0,0,.28), 0 4px 0 rgba(0,0,0,.2); }
+		.score-ring-inner { display: grid; place-items: center; width: 108px; height: 108px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 3px 8px rgba(0,0,0,.3); }
+		.score-number { font-size: 1.8rem; font-weight: 800; } .score-label { color: var(--muted); font: .6rem 'DM Mono', monospace; text-transform: uppercase; }
+		.score-copy h3 { margin-bottom: 7px; } .score-copy p { margin: 0; }
+		.chart { display: flex; align-items: end; gap: 8px; height: 130px; padding: 15px 10px 0; border-bottom: 1px solid var(--line); background: repeating-linear-gradient(0deg, transparent 0, transparent 31px, var(--line) 32px); }
+		.chart-bar { flex: 1; min-width: 8px; height: 20%; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--accent), rgba(56,189,248,.25)); box-shadow: 0 0 10px rgba(56,189,248,.22); transition: height .8s ease; }
+		.visual-grid { display: grid; grid-template-columns: 1fr 150px; gap: 22px; margin-top: 25px; padding-top: 22px; border-top: 1px solid var(--line); }
+		.profile-chart { display: grid; gap: 11px; }
+		.profile-row { display: grid; grid-template-columns: 105px 1fr 38px; align-items: center; gap: 9px; font-size: .72rem; }
+		.profile-track { height: 10px; overflow: hidden; border-radius: 8px; background: rgba(0,0,0,.22); box-shadow: inset 0 2px 4px rgba(0,0,0,.22); }
+		.profile-fill { width: 0%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent), #b9f5d0); transition: width .8s ease; }
+		.profile-value { color: var(--text); font: .68rem 'DM Mono', monospace; text-align: right; }
+		.quality-gauge { display: grid; place-items: center; width: 125px; height: 125px; border-radius: 50%; background: conic-gradient(var(--accent) 0deg, rgba(255,255,255,.1) 0deg); box-shadow: inset 0 3px 8px rgba(0,0,0,.28), 0 4px 0 rgba(0,0,0,.2); }
+		.quality-gauge-inner { display: grid; place-items: center; width: 95px; height: 95px; border-radius: 50%; background: var(--bg); box-shadow: inset 0 3px 8px rgba(0,0,0,.3); text-align: center; }
+		.quality-number { font-size: 1.35rem; font-weight: 800; } .quality-label { color: var(--muted); font: .55rem 'DM Mono', monospace; text-transform: uppercase; }
+		.result-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 24px; margin-top: 23px; }
+		.result-section h3 { margin: 0 0 11px; color: var(--accent); font: 500 .7rem 'DM Mono', monospace; letter-spacing: .1em; text-transform: uppercase; }
+		.result-section p, .result-section li { color: var(--muted); font-size: .88rem; line-height: 1.65; }
+		.result-section ul { margin: 0; padding-left: 20px; }
+		.metric-list { display: grid; gap: 9px; }
+		.metric { display: flex; justify-content: space-between; gap: 15px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.035); font-size: .8rem; }
+		.metric strong { color: var(--text); }
+		.notice { margin-top: 25px; padding: 15px; border-left: 3px solid #ff9c68; background: rgba(255,156,104,.08); color: var(--muted); font-size: .78rem; line-height: 1.6; }
+		@media (max-width: 760px) { body { padding: 24px 16px; } .result-grid { grid-template-columns: 1fr; } .actions { align-items: stretch; flex-direction: column; } .status { margin: 0; } button { width: 100%; } .score-panel { grid-template-columns: 1fr; justify-items: center; text-align: center; } .visual-grid { grid-template-columns: 1fr; } .quality-gauge { margin: 0 auto; } .processing-steps { font-size: .58rem; } }
+	</style>
+</head>
+<body>
+	<main class="analysis-page">
+		<div class="kicker">VeriScan intelligence / 03</div>
+		<h1>Give the signal context.</h1>
+		<p class="lede">Upload a video to receive a detailed summary of observable audiovisual context. The analysis reports what is present in the recording, its signal quality, and its limitations.</p>
+		<section class="upload-card">
+			<form id="uploadForm">
+				<label id="dropZone" class="drop-zone" for="videoInput">
+					<span class="drop-icon">&#8593;</span>
+					<strong>Drop a video here or choose a file</strong>
+					<span>MP4, MOV, WebM, AVI, or MKV · maximum 200 MB</span>
+					<input id="videoInput" name="video" type="file" accept="video/mp4,video/quicktime,video/webm,video/x-msvideo,video/x-matroska" hidden>
+				</label>
+				<div id="fileName" class="file-name">No video selected</div>
+				<div class="actions"><p id="status" class="status" role="status">Ready for a video.</p><button id="analyzeButton" type="submit" disabled>Analyze video</button></div>
+			</form>
+		</section>
+		<section id="processing" class="processing" aria-live="polite">
+			<div class="processing-top"><span id="processingTitle" class="processing-title">Preparing analysis...</span><span id="processingPercent" class="processing-percent">4%</span></div>
+			<div class="processing-bar"><div id="processingFill" class="processing-fill"></div></div>
+			<div class="processing-steps"><span id="stepUpload" class="processing-step active">01 / UPLOAD</span><span id="stepScan" class="processing-step">02 / SCAN SIGNALS</span><span id="stepContext" class="processing-step">03 / BUILD CONTEXT</span></div>
+			<div class="signal-pulse" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+		</section>
+		<section id="results" class="results-card" aria-live="polite">
+			<div class="result-header"><h2>Analysis context</h2><span>OBSERVATION ONLY</span></div>
+			<div class="score-panel"><div id="scoreRing" class="score-ring"><div class="score-ring-inner"><div><div id="stressScore" class="score-number">--%</div><div class="score-label">cue estimate</div></div></div></div><div class="score-copy result-section"><h3>Observable stress-related cues</h3><p>This 0–100% estimate reflects visible or audible cues in the recording, not a diagnosis or a measurement of someone’s internal state.</p></div></div>
+			<div class="result-grid">
+				<div class="result-section"><h3>Summary</h3><p id="summary">No analysis yet.</p><h3>Observed context</h3><ul id="observations"></ul><h3 style="margin-top:22px">Cue timeline</h3><div id="chart" class="chart" aria-label="Observable stress cue timeline"></div></div>
+				<div class="result-section"><h3>Observable metrics</h3><div id="metrics" class="metric-list"></div><h3 style="margin-top:22px">Signal quality</h3><div id="quality" class="metric"></div></div>
+			</div>
+			<div class="visual-grid"><div class="result-section"><h3>Signal profile</h3><div id="profileChart" class="profile-chart"></div></div><div class="result-section"><h3>Recording quality</h3><div id="qualityGauge" class="quality-gauge"><div class="quality-gauge-inner"><div><div id="qualityNumber" class="quality-number">--%</div><div class="quality-label">quality</div></div></div></div></div></div>
+			<div class="notice"><strong>Limits of this analysis:</strong> Video cues cannot establish intent, truthfulness, identity, criminality, guilt, or innocence. Do not use this output as evidence or as the basis for a consequential decision. Human review and appropriate due process are required.</div>
+		</section>
+	</main>
+	<script>
+		const input = document.getElementById('videoInput');
+		const dropZone = document.getElementById('dropZone');
+		const fileName = document.getElementById('fileName');
+		const status = document.getElementById('status');
+		const analyzeButton = document.getElementById('analyzeButton');
+		const results = document.getElementById('results');
+		const processing = document.getElementById('processing');
+		const processingFill = document.getElementById('processingFill');
+		const processingPercent = document.getElementById('processingPercent');
+		const processingTitle = document.getElementById('processingTitle');
+		let processingTimer;
+		const allowedExtensions = ['mp4', 'mov', 'webm', 'avi', 'mkv'];
+
+		function chooseFile(file) {
+			if (!file) return;
+			const extension = file.name.split('.').pop().toLowerCase();
+			if (!allowedExtensions.includes(extension)) {
+				status.textContent = 'Unsupported video type.';
+				status.className = 'status error';
+				analyzeButton.disabled = true;
+				return;
+			}
+			if (file.size > 200 * 1024 * 1024) {
+				status.textContent = 'Video exceeds the 200 MB limit.';
+				status.className = 'status error';
+				analyzeButton.disabled = true;
+				return;
+			}
+			fileName.textContent = `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB)`;
+			status.textContent = 'Video ready for analysis.';
+			status.className = 'status';
+			analyzeButton.disabled = false;
+		}
+
+		input.addEventListener('change', () => chooseFile(input.files[0]));
+		['dragenter', 'dragover'].forEach((eventName) => dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.add('dragging'); }));
+		['dragleave', 'drop'].forEach((eventName) => dropZone.addEventListener(eventName, (event) => { event.preventDefault(); dropZone.classList.remove('dragging'); }));
+		dropZone.addEventListener('drop', (event) => { const [file] = event.dataTransfer.files; if (file) { const transfer = new DataTransfer(); transfer.items.add(file); input.files = transfer.files; chooseFile(file); } });
+
+		function renderAnalysis(rawText) {
+			const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[character]));
+			const cleaned = rawText.replace(/^```json\s*/i, '').replace(/\s*```$/, '').trim();
+			let data;
+			try { data = JSON.parse(cleaned); } catch (error) { document.getElementById('summary').textContent = rawText; return; }
+			document.getElementById('summary').textContent = data.summary || 'No summary returned.';
+			const stressScore = Math.max(0, Math.min(100, Number(data.stress_cue_score) || 0));
+			document.getElementById('stressScore').textContent = `${stressScore}%`;
+			document.getElementById('scoreRing').style.background = `conic-gradient(var(--accent) ${stressScore * 3.6}deg, rgba(255,255,255,.1) ${stressScore * 3.6}deg)`;
+			document.getElementById('chart').innerHTML = (data.stress_cue_samples || []).slice(0, 8).map((value) => `<span class="chart-bar" style="height:${Math.max(0, Math.min(100, Number(value) || 0))}%" title="${escapeHtml(value)}% cue estimate"></span>`).join('') || '<span class="status">No timeline returned.</span>';
+			const qualityScore = Math.max(0, Math.min(100, Number(data.signal_quality_score) || 0));
+			document.getElementById('qualityNumber').textContent = `${qualityScore}%`;
+			document.getElementById('qualityGauge').style.background = `conic-gradient(var(--accent) ${qualityScore * 3.6}deg, rgba(255,255,255,.1) ${qualityScore * 3.6}deg)`;
+			const profileDefaults = ['Motion', 'Vocal energy', 'Facial activity', 'Speech activity'];
+			const profile = profileDefaults.map((label) => (data.signal_profile || []).find((item) => item.label === label) || { label, value: 0 });
+			document.getElementById('profileChart').innerHTML = profile.map((item) => { const value = Math.max(0, Math.min(100, Number(item.value) || 0)); return `<div class="profile-row"><span>${escapeHtml(item.label)}</span><div class="profile-track"><div class="profile-fill" style="width:${value}%"></div></div><span class="profile-value">${value}%</span></div>`; }).join('');
+			document.getElementById('observations').innerHTML = (data.observed_context || []).map((item) => `<li>${escapeHtml(item)}</li>`).join('') || '<li>No observations returned.</li>';
+			document.getElementById('metrics').innerHTML = (data.observable_metrics || []).map((metric) => `<div class="metric"><span>${escapeHtml(metric.name || 'Metric')}</span><strong>${escapeHtml(metric.value ?? 'Not available')}</strong></div>`).join('') || '<div class="metric">No metrics returned.</div>';
+			document.getElementById('quality').innerHTML = `<span>Signal quality score</span><strong>${escapeHtml(data.signal_quality_score ?? 'Not available')} / 100</strong>`;
+		}
+
+		document.getElementById('uploadForm').addEventListener('submit', async (event) => {
+			event.preventDefault();
+			if (!input.files[0]) return;
+			analyzeButton.disabled = true;
+			status.textContent = 'Uploading and analyzing...';
+			status.className = 'status';
+			results.classList.remove('visible');
+			processing.classList.add('visible');
+			let progress = 4;
+			const stages = [[30, 'Uploading video...'], [62, 'Scanning observable signals...'], [86, 'Building detailed context...']];
+			processingTimer = setInterval(() => {
+				const stage = stages.find(([threshold]) => progress < threshold);
+				if (stage) { progress += 1; processingTitle.textContent = stage[1]; }
+				processingFill.style.width = `${progress}%`;
+				processingPercent.textContent = `${progress}%`;
+				document.querySelectorAll('.processing-step').forEach((step, index) => step.classList.toggle('active', progress >= [4, 30, 62][index]));
+			}, 180);
+			try {
+				const response = await fetch('/analyze-video', { method: 'POST', body: new FormData(event.target) });
+				const data = await response.json();
+				if (!response.ok) throw new Error(data.error || 'Analysis failed.');
+				renderAnalysis(data.analysis);
+				results.classList.add('visible');
+				status.textContent = 'Analysis complete.';
+			} catch (error) {
+				status.textContent = error.message;
+				status.className = 'status error';
+			} finally { clearInterval(processingTimer); processing.classList.remove('visible'); analyzeButton.disabled = false; }
+		});
+	</script>
+	<script src="/static/sidepanel.js"></script>
+</body>
+</html>
