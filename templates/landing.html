@@ -159,7 +159,7 @@
 			</div>
 		</section>
 
-		<section class="wrap insights-section">
+		<section id="insights" class="wrap insights-section">
 			{% if latest_report %}
 			<div class="insights-panel"><div><p class="insights-label">Your latest session</p><h2>{{ latest_report['headline'] }}</h2><p>{{ latest_report['summary'] }}</p><p style="margin-top:10px"><a class="nav-link" href="{{ url_for('index') }}">Open dashboard to start another session +</a> · <a class="nav-link" href="{{ url_for('logout') }}">Log out</a></p></div><div class="insight-score"><strong>{{ '%.1f'|format(latest_report['stress_score'] or 0) }}%</strong><span>average cue estimate</span></div></div>
 			{% else %}
