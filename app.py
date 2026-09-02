@@ -1,4 +1,5 @@
 import os
+import json
 import sqlite3
 import tempfile
 
@@ -11,6 +12,8 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY') or os.urandom(32)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
 DATABASE_PATH = os.getenv('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'veriscan.db'))
@@ -35,6 +38,16 @@ def initialize_database():
         password_hash TEXT NOT NULL,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )''')
+    database.execute('''CREATE TABLE IF NOT EXISTS session_reports (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        headline TEXT NOT NULL,
+        summary TEXT NOT NULL,
+        stress_score REAL,
+        sample_count INTEGER,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users (id)
+    )''')
     database.commit()
     database.close()
 
@@ -42,7 +55,12 @@ initialize_database()
 
 @app.route('/')
 def landing():
-    return render_template('landing.html')
+    latest_report = None
+    if session.get('user_id'):
+        database = get_database()
+        latest_report = database.execute('SELECT headline, summary, stress_score, sample_count, created_at FROM session_reports WHERE user_id = ? ORDER BY id DESC LIMIT 1', (session['user_id'],)).fetchone()
+        database.close()
+    return render_template('landing.html', latest_report=latest_report)
 
 @app.route('/app')
 @app.route('/APP')
@@ -82,6 +100,7 @@ def login():
         database.close()
         if user and check_password_hash(user['password_hash'], password):
             session.clear()
+            session.permanent = True
             session['user_id'] = user['id']
             session['username'] = user['username']
             return redirect(request.args.get('next') or url_for('index'))
@@ -111,6 +130,7 @@ def create_account():
                 cursor = database.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', (username, email, generate_password_hash(password)))
                 database.commit()
                 session.clear()
+                session.permanent = True
                 session['user_id'] = cursor.lastrowid
                 session['username'] = username
                 database.close()
@@ -125,6 +145,15 @@ def create_account():
 def logout():
     session.clear()
     return redirect(url_for('landing'))
+
+@app.route('/api/account-status')
+def account_status():
+    if not session.get('user_id'):
+        return jsonify({'authenticated': False})
+    database = get_database()
+    report = database.execute('SELECT headline, summary, stress_score, sample_count, created_at FROM session_reports WHERE user_id = ? ORDER BY id DESC LIMIT 1', (session['user_id'],)).fetchone()
+    database.close()
+    return jsonify({'authenticated': True, 'username': session.get('username'), 'latest_report': dict(report) if report else None})
 
 @app.route('/analyze-video', methods=['POST'])
 def analyze_video():
@@ -215,6 +244,18 @@ def generate_verdict():
                 'observable cues and that human review is required for consequential decisions.'
             )
         )
+        if session.get('user_id'):
+            try:
+                parsed_verdict = json.loads(response.text.replace('```json', '').replace('```', '').strip())
+            except (TypeError, json.JSONDecodeError):
+                parsed_verdict = {'headline': 'Session summary', 'summary': response.text}
+            database = get_database()
+            database.execute(
+                'INSERT INTO session_reports (user_id, headline, summary, stress_score, sample_count) VALUES (?, ?, ?, ?, ?)',
+                (session['user_id'], parsed_verdict.get('headline', 'Session summary'), parsed_verdict.get('summary', ''), metrics.get('average_stress_cue_score'), metrics.get('sample_count'))
+            )
+            database.commit()
+            database.close()
         return jsonify({'verdict': response.text})
     except Exception as error:
         return jsonify({'error': f'Could not generate session summary: {error}'}), 502

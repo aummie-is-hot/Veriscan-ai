@@ -77,11 +77,7 @@
 			<a href="/app#vision"><span class="nav-icon">&#9673;</span><span class="nav-text">Vision feed</span></a>
 			<a href="/app#metrics"><span class="nav-icon">&#8943;</span><span class="nav-text">Signal metrics</span></a>
 		</nav>
-		<div class="side-panel-settings">
-			<div class="side-panel-label">Appearance</div>
-			<label class="setting-row"><span class="nav-icon">&#9788;</span><span class="nav-text">Light theme</span><input class="theme-switch" type="checkbox" aria-label="Use light theme"></label>
-			<label class="setting-row"><span class="nav-icon">&#9679;</span><span class="nav-text">Primary color</span><input class="color-picker" type="color" value="${savedColor}" aria-label="Choose primary color"></label>
-		</div>
+		<div class="side-panel-account" aria-live="polite"><span class="account-dot"></span><span class="account-text">Guest mode</span></div>
 		<a class="side-panel-landing" href="/"><span class="nav-icon">&#8592;</span><span class="nav-text">Back to landing</span></a>
 	`;
 
@@ -136,7 +132,8 @@
 		.side-panel-nav a, .side-panel-landing, .setting-row { display: flex; align-items: center; gap: 13px; min-height: 43px; padding: 0 14px; border-radius: 6px; color: var(--muted); font: 600 .78rem 'Manrope', sans-serif; transition: background .2s, color .2s; }
 		.side-panel-nav a:hover, .side-panel-nav a.active, .side-panel-landing:hover, .setting-row:hover { color: var(--text); background: rgba(var(--primary-rgb), .12); }
 		.nav-icon { display: inline-grid; place-items: center; width: 17px; color: var(--primary); font-size: .9rem; flex: 0 0 17px; }
-		.side-panel-settings { margin-top: 16px; }
+		.side-panel-account { display: flex; align-items: center; gap: 9px; margin: 20px 14px 0; color: var(--muted); font: 500 .65rem 'DM Mono', monospace; white-space: nowrap; overflow: hidden; }
+		.account-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
 		.setting-row { cursor: pointer; }
 		.setting-row input { margin-left: auto; }
 		.theme-switch { accent-color: var(--primary); width: 16px; height: 16px; }
@@ -146,20 +143,16 @@
 		.side-panel.collapsed { width: var(--side-panel-collapsed); }
 		body.panel-collapsed { padding-left: calc(30px + var(--side-panel-collapsed)); }
 		.side-panel.collapsed .side-panel-brand, .side-panel.collapsed .side-panel-label, .side-panel.collapsed .nav-text { display: none; }
-		.side-panel.collapsed .side-panel-settings { margin-top: 16px; }
-		.side-panel.collapsed .setting-row { justify-content: center; padding-left: 0; padding-right: 0; }
-		.side-panel.collapsed .setting-row input { margin-left: 0; }
-		.side-panel.collapsed .theme-switch { display: none; }
+		.side-panel.collapsed .side-panel-account { justify-content: center; margin-left: 0; margin-right: 0; }
+		.side-panel.collapsed .account-text { display: none; }
 		.side-panel.collapsed .side-panel-nav a, .side-panel.collapsed .side-panel-landing { justify-content: center; padding-left: 0; padding-right: 0; }
-		@media (max-width: 760px) { body, body.panel-collapsed { padding: 86px 16px 24px; } .side-panel { inset: 0 0 auto; width: 100%; height: 68px; padding: 0 16px; flex-direction: row; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-color); } .side-panel-brand { padding: 0; } .side-panel-toggle { top: 20px; right: 16px; } .side-panel-nav, .side-panel-settings, .side-panel-landing { display: none; } .side-panel:not(.collapsed) .side-panel-nav { position: absolute; top: 68px; left: 0; right: 0; display: flex; gap: 4px; padding: 10px 12px; background: var(--surface, #101a1c); border-bottom: 1px solid var(--border-color); } .side-panel:not(.collapsed) .side-panel-label { display: none; } .side-panel:not(.collapsed) .side-panel-nav a { flex: 1; justify-content: center; padding: 0 8px; font-size: .7rem; } .side-panel:not(.collapsed) .side-panel-settings { position: absolute; top: 111px; right: 12px; display: flex; gap: 4px; } .side-panel:not(.collapsed) .side-panel-settings .side-panel-label { display: none; } .side-panel:not(.collapsed) .setting-row { min-height: 34px; padding: 0 8px; background: var(--surface, #101a1c); } .side-panel:not(.collapsed) .setting-row .nav-text { display: none; } }
+		@media (max-width: 760px) { body, body.panel-collapsed { padding: 86px 16px 24px; } .side-panel { inset: 0 0 auto; width: 100%; height: 68px; padding: 0 16px; flex-direction: row; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-color); } .side-panel-brand { padding: 0; } .side-panel-toggle { top: 20px; right: 16px; } .side-panel-nav, .side-panel-account, .side-panel-landing { display: none; } .side-panel:not(.collapsed) .side-panel-nav { position: absolute; top: 68px; left: 0; right: 0; display: flex; gap: 4px; padding: 10px 12px; background: var(--surface, #101a1c); border-bottom: 1px solid var(--border-color); } .side-panel:not(.collapsed) .side-panel-label { display: none; } .side-panel:not(.collapsed) .side-panel-nav a { flex: 1; justify-content: center; padding: 0 8px; font-size: .7rem; } }
 	`;
 
 	document.head.appendChild(styles);
 	document.body.prepend(panel);
 
 	const toggle = panel.querySelector('.side-panel-toggle');
-	const themeSwitch = panel.querySelector('.theme-switch');
-	const colorPicker = panel.querySelector('.color-picker');
 	const isMobile = window.matchMedia('(max-width: 760px)').matches;
 	const savedPanelState = localStorage.getItem('veriscan-panel-collapsed');
 	const startCollapsed = isMobile || savedPanelState === 'true';
@@ -170,16 +163,19 @@
 		toggle.setAttribute('aria-label', 'Expand navigation');
 		panel.querySelector('.side-panel-toggle-icon').innerHTML = '&#8250;';
 	}
-	themeSwitch.checked = savedTheme === 'light';
-	themeSwitch.addEventListener('change', () => {
-		const theme = themeSwitch.checked ? 'light' : 'dark';
-		localStorage.setItem('veriscan-theme', theme);
-		applyTheme(theme, colorPicker.value);
-	});
-	colorPicker.addEventListener('input', () => {
-		localStorage.setItem('veriscan-primary', colorPicker.value);
-		applyTheme(themeSwitch.checked ? 'light' : 'dark', colorPicker.value);
-	});
+	fetch('/api/account-status').then((response) => response.json()).then((account) => {
+		if (account.authenticated) {
+			panel.querySelector('.account-text').textContent = `Signed in as ${account.username}`;
+			panel.querySelector('.side-panel-account').title = 'Account session active';
+			panel.querySelector('[data-route="/login"]').style.display = 'none';
+			panel.querySelector('[data-route="/create-account"]').style.display = 'none';
+			const logoutLink = document.createElement('a');
+			logoutLink.href = '/logout';
+			logoutLink.className = 'side-panel-logout';
+			logoutLink.innerHTML = '<span class="nav-icon">&#8594;</span><span class="nav-text">Log out</span>';
+			panel.querySelector('.side-panel-nav').appendChild(logoutLink);
+		}
+	}).catch(() => {});
 	toggle.addEventListener('click', () => {
 		const collapsed = panel.classList.toggle('collapsed');
 		document.body.classList.toggle('panel-collapsed', collapsed);
