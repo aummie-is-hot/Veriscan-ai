@@ -164,16 +164,6 @@
 		toggle.setAttribute('aria-label', 'Expand navigation');
 		panel.querySelector('.side-panel-toggle-icon').innerHTML = '&#8250;';
 	}
-	themeSwitch.checked = savedTheme === 'light';
-	themeSwitch.addEventListener('change', () => {
-		const theme = themeSwitch.checked ? 'light' : 'dark';
-		localStorage.setItem('veriscan-theme', theme);
-		applyTheme(theme, colorPicker.value);
-	});
-	colorPicker.addEventListener('input', () => {
-		localStorage.setItem('veriscan-primary', colorPicker.value);
-		applyTheme(themeSwitch.checked ? 'light' : 'dark', colorPicker.value);
-	});
 	fetch('/api/account-status').then((response) => response.json()).then((account) => {
 		if (account.authenticated) {
 			panel.querySelector('.account-text').textContent = `Signed in as ${account.username}`;
