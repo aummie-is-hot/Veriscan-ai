@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>How VeriScan Works | VeriScan AI</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+	<style>
+		:root { --bg:#090d16; --panel:rgba(22,30,46,.82); --line:rgba(255,255,255,.1); --text:#f1f5f9; --muted:#94a3b8; --accent:#38bdf8; --orange:#ff9c68; }
+		* { box-sizing:border-box; } body { min-height:100vh; margin:0; padding:30px; color:var(--text); background:var(--bg); background-image:radial-gradient(circle at 55% 0%,rgba(56,189,248,.12),transparent 40%); font-family:'Manrope',sans-serif; }
+		.info-page { width:min(1000px,100%); margin:0 auto; } .kicker { margin:38px 0 14px; color:var(--accent); font:500 .7rem 'DM Mono',monospace; letter-spacing:.14em; text-transform:uppercase; } h1 { margin:0; font-size:clamp(2.5rem,6vw,5.4rem); line-height:1; letter-spacing:-.06em; } .intro { max-width:700px; margin:20px 0 85px; color:var(--muted); font-size:1rem; line-height:1.75; }
+		.info-section { padding:35px 0 95px; border-top:1px solid var(--line); } .section-label { color:var(--orange); font:500 .7rem 'DM Mono',monospace; letter-spacing:.12em; text-transform:uppercase; } h2 { margin:13px 0 30px; font-size:2rem; letter-spacing:-.04em; } h3 { margin:0 0 9px; font-size:1rem; } p, li { color:var(--muted); font-size:.88rem; line-height:1.7; } .metric-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; } .metric-card, .process-step { padding:22px; border:1px solid var(--line); border-radius:11px; background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(0,0,0,.12)); box-shadow:inset 1px 1px 0 rgba(255,255,255,.1),inset -2px -2px 0 rgba(0,0,0,.18),0 12px 24px rgba(0,0,0,.2); } .metric-card h3 { color:var(--text); } .metric-card h3 span { margin-right:8px; color:var(--accent); font:500 .7rem 'DM Mono',monospace; } .metric-card p { margin:0; }
+		.process { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); } .process-step { min-height:190px; border:0; border-radius:0; background:var(--panel); } .process-step strong { display:block; color:var(--accent); font:500 .7rem 'DM Mono',monospace; } .process-step h3 { margin-top:35px; } .limit { margin-top:25px; padding:17px; border-left:3px solid var(--orange); background:rgba(255,156,104,.08); }
+		@media(max-width:760px) { body { padding:24px 16px; } .intro { margin-bottom:58px; } .metric-grid, .process { grid-template-columns:1fr; } .process-step { min-height:0; } }
+	</style>
+</head>
+<body>
+	<main class="info-page">
+		<div class="kicker">VeriScan field guide / 05</div><h1>Understand the signal.</h1>
+		<p class="intro">VeriScan combines computer-vision landmarks, audio features, and language signals to create a live telemetry view. These metrics describe patterns detected by the system; they do not reveal a person’s private thoughts, intentions, truthfulness, or character.</p>
+		<section class="info-section"><div class="section-label">01 / Live metrics</div><h2>What each signal means</h2><div class="metric-grid">
+			<article class="metric-card"><h3><span>AU04</span>Brow contraction</h3><p>Estimates brow-lowering movement from facial landmarks. Lighting, camera angle, glasses, and expression can affect the signal.</p></article>
+			<article class="metric-card"><h3><span>AU12</span>Smile movement</h3><p>Tracks mouth-corner movement as an observable facial action. It is not a direct measure of happiness or sincerity.</p></article>
+			<article class="metric-card"><h3><span>POSTURE</span>Shift speed</h3><p>Measures changes in tracked body landmarks over time. Larger movement can reflect many ordinary contexts, including adjustment or activity.</p></article>
+			<article class="metric-card"><h3><span>FIDGET</span>Movement score</h3><p>Summarizes short-term movement in tracked facial landmarks. It is sensitive to camera stability and should be read as a pattern, not a diagnosis.</p></article>
+			<article class="metric-card"><h3><span>VOICE</span>Pitch and volume</h3><p>Reports acoustic features such as approximate pitch and loudness. Microphone distance, background noise, and speaking style influence them.</p></article>
+			<article class="metric-card"><h3><span>STRESS CUES</span>Combined estimate</h3><p>Combines configured visual, vocal, and transcript cue contributions with smoothing. It estimates observable cues and cannot measure internal stress.</p></article>
+		</div></section>
+		<section class="info-section"><div class="section-label">02 / System flow</div><h2>How the live system works</h2><div class="process"><article class="process-step"><strong>01 / CAPTURE</strong><h3>Camera and microphone</h3><p>Media stays in the browser while the system samples frames and audio features.</p></article><article class="process-step"><strong>02 / TRACK</strong><h3>Landmark detection</h3><p>MediaPipe tracks body and face landmarks to calculate movement and facial action values.</p></article><article class="process-step"><strong>03 / SMOOTH</strong><h3>Stabilized metrics</h3><p>Exponential smoothing reduces sudden noise so the dashboard is easier to interpret.</p></article><article class="process-step"><strong>04 / REVIEW</strong><h3>Human interpretation</h3><p>Users compare signals with context instead of treating a single score as a conclusion.</p></article></div></section>
+		<section class="info-section"><div class="section-label">03 / Video analysis</div><h2>How uploaded video is analyzed</h2><p>Video analysis uses Gemini to review the uploaded clip and return structured context. The model is instructed to describe observable audiovisual content, signal quality, cue timelines, and limitations.</p><div class="metric-grid"><article class="metric-card"><h3>Upload and inspect</h3><p>The server validates the file type and size, uploads a temporary copy for analysis, and removes the temporary local file afterward.</p></article><article class="metric-card"><h3>Structured output</h3><p>Results include a summary, observations, observable metrics, a cue estimate, a timeline, a signal profile, and recording quality.</p></article></div><div class="limit"><strong>Important boundary:</strong> Behavioral or vocal cues cannot establish guilt, innocence, deception, identity, intent, or mental state. Results are assistive observations and require human review, especially for consequential decisions.</div></section>
+	</main>
+	<script src="/static/sidepanel.js"></script>
+</body>
+</html>

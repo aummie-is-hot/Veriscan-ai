@@ -1,21 +1,44 @@
 import os
+import sqlite3
 import tempfile
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from google import genai
 from dotenv import load_dotenv
+from werkzeug.security import check_password_hash, generate_password_hash
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY') or os.urandom(32)
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 ALLOWED_VIDEO_EXTENSIONS = {'mp4', 'mov', 'webm', 'avi', 'mkv'}
+DATABASE_PATH = os.getenv('DATABASE_PATH', os.path.join(os.path.dirname(__file__), 'veriscan.db'))
 
 # Initialize Gemini from the local environment; never commit credentials.
 API_KEY = os.getenv('GEMINI_API_KEY')
 if not API_KEY:
     raise RuntimeError('GEMINI_API_KEY is not configured. Add it to .env or the process environment.')
 client = genai.Client(api_key=API_KEY)
+
+def get_database():
+    database = sqlite3.connect(DATABASE_PATH)
+    database.row_factory = sqlite3.Row
+    return database
+
+def initialize_database():
+    database = get_database()
+    database.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )''')
+    database.commit()
+    database.close()
+
+initialize_database()
 
 @app.route('/')
 def landing():
@@ -40,6 +63,68 @@ def upload():
 @app.route('/SETTINGS')
 def settings():
     return render_template('settings.html')
+
+@app.route('/info')
+@app.route('/INFO')
+@app.route('/Info')
+def info():
+    return render_template('Info.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+@app.route('/LOGIN', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        identifier = request.form.get('identifier', '').strip()
+        password = request.form.get('password', '')
+        database = get_database()
+        user = database.execute('SELECT * FROM users WHERE email = ? OR username = ?', (identifier.lower(), identifier)).fetchone()
+        database.close()
+        if user and check_password_hash(user['password_hash'], password):
+            session.clear()
+            session['user_id'] = user['id']
+            session['username'] = user['username']
+            return redirect(request.args.get('next') or url_for('index'))
+        error = 'We could not match those login details.'
+    return render_template('login.html', error=error)
+
+@app.route('/create-account', methods=['GET', 'POST'])
+@app.route('/CREATE-ACCOUNT', methods=['GET', 'POST'])
+def create_account():
+    error = None
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        if len(username) < 3 or len(username) > 30 or not username.replace('_', '').isalnum():
+            error = 'Username must be 3-30 characters using letters, numbers, or underscores.'
+        elif '@' not in email or len(email) > 254:
+            error = 'Enter a valid email address.'
+        elif len(password) < 8:
+            error = 'Password must be at least 8 characters.'
+        elif password != confirm_password:
+            error = 'Passwords do not match.'
+        else:
+            database = get_database()
+            try:
+                cursor = database.execute('INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)', (username, email, generate_password_hash(password)))
+                database.commit()
+                session.clear()
+                session['user_id'] = cursor.lastrowid
+                session['username'] = username
+                database.close()
+                return redirect(url_for('index'))
+            except sqlite3.IntegrityError:
+                error = 'That username or email is already in use.'
+            finally:
+                database.close()
+    return render_template('createaccount.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('landing'))
 
 @app.route('/analyze-video', methods=['POST'])
 def analyze_video():

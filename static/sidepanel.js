@@ -70,6 +70,9 @@
 			<a href="/assistant" data-route="/assistant"><span class="nav-icon">&#9673;</span><span class="nav-text">Assistant</span></a>
 			<a href="/upload" data-route="/upload"><span class="nav-icon">&#8593;</span><span class="nav-text">Video analysis</span></a>
 			<a href="/settings" data-route="/settings"><span class="nav-icon">&#9881;</span><span class="nav-text">Settings</span></a>
+			<a href="/info" data-route="/info"><span class="nav-icon">&#8505;</span><span class="nav-text">How it works</span></a>
+			<a href="/login" data-route="/login"><span class="nav-icon">&#8594;</span><span class="nav-text">Log in</span></a>
+			<a href="/create-account" data-route="/create-account"><span class="nav-icon">&#43;</span><span class="nav-text">Create account</span></a>
 			<div class="side-panel-label">Telemetry</div>
 			<a href="/app#vision"><span class="nav-icon">&#9673;</span><span class="nav-text">Vision feed</span></a>
 			<a href="/app#metrics"><span class="nav-icon">&#8943;</span><span class="nav-text">Signal metrics</span></a>

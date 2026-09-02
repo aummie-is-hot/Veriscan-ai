@@ -35,6 +35,9 @@
 		.brand { font-size: 0.9rem; letter-spacing: 0.17em; font-weight: 800; }
 		.brand span { color: var(--mint); }
 		.nav-link { color: var(--muted); font: 500 0.72rem 'DM Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+		.nav-actions { display: flex; align-items: center; gap: 18px; }
+		.nav-account { padding: 9px 13px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); font: 700 .68rem 'DM Mono', monospace; letter-spacing: .05em; text-transform: uppercase; }
+		.nav-account:hover { border-color: var(--mint); color: var(--mint); }
 		.nav-link:hover { color: var(--ink); }
 		.hero { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 70px; align-items: end; padding: 92px 0 116px; }
 		.eyebrow { color: var(--mint); font: 500 0.7rem 'DM Mono', monospace; letter-spacing: 0.13em; text-transform: uppercase; }
@@ -108,7 +111,7 @@
 <body>
 	<header class="wrap nav">
 		<a class="brand" href="{{ url_for('landing') }}">VERISCAN <span>AI</span></a>
-		<a class="nav-link" href="#roadmap">What's next +</a>
+		<div class="nav-actions"><a class="nav-link" href="#roadmap">What's next +</a><a class="nav-account" href="{{ url_for('login') }}">Log in / Create account</a></div>
 	</header>
 
 	<main>
