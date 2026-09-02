@@ -16,6 +16,10 @@
 		h1 { margin: 0; font-size: clamp(2.4rem, 5vw, 4.5rem); letter-spacing: -.06em; }
 		.lede { max-width: 620px; margin: 18px 0 36px; color: var(--muted); line-height: 1.7; }
 		.settings-card { margin-bottom: 18px; padding: 26px; border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(145deg, rgba(255,255,255,.08), rgba(0,0,0,.14)); box-shadow: inset 1px 1px 0 rgba(255,255,255,.1), inset -2px -2px 0 rgba(0,0,0,.22), 0 20px 38px rgba(0,0,0,.3); }
+		.appearance-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+		.appearance-control { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: 8px; background: rgba(0,0,0,.14); }
+		.appearance-control span { color: var(--muted); font-size: .78rem; font-weight: 700; }
+		.appearance-control input[type="color"] { width: 36px; height: 30px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; background: transparent; cursor: pointer; }
 		h2 { margin: 0 0 7px; font-size: 1.15rem; } .card-copy { margin: 0 0 22px; color: var(--muted); font-size: .82rem; line-height: 1.6; }
 		.setting { padding: 18px 0; border-top: 1px solid var(--line); } .setting:first-of-type { border-top: 0; }
 		.setting-heading { display: flex; justify-content: space-between; gap: 15px; align-items: baseline; } .setting-heading label { font-weight: 700; font-size: .9rem; } output, .setting-value { color: var(--accent); font: 500 .75rem 'DM Mono', monospace; }
@@ -24,7 +28,7 @@
 		.select-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; } .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
 		.switch { position: relative; width: 43px; height: 24px; flex: 0 0 auto; } .switch input { opacity: 0; width: 0; height: 0; } .slider { position: absolute; inset: 0; border-radius: 20px; background: rgba(255,255,255,.16); cursor: pointer; box-shadow: inset 0 2px 4px rgba(0,0,0,.3); transition: .2s; } .slider:before { position: absolute; content: ''; width: 18px; height: 18px; left: 3px; top: 3px; border-radius: 50%; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.35); transition: .2s; } input:checked + .slider { background: var(--accent); } input:checked + .slider:before { transform: translateX(19px); }
 		.notice { padding: 15px; border-left: 3px solid #ff9c68; color: var(--muted); background: rgba(255,156,104,.08); font-size: .75rem; line-height: 1.6; }
-		@media (max-width: 760px) { body { padding: 24px 16px; } .select-row, .toggle-row { align-items: flex-start; flex-direction: column; gap: 13px; } select { width: 100%; } }
+		@media (max-width: 760px) { body { padding: 24px 16px; } .select-row, .toggle-row { align-items: flex-start; flex-direction: column; gap: 13px; } select { width: 100%; } .appearance-grid { grid-template-columns: 1fr; } }
 	</style>
 </head>
 <body>
@@ -32,6 +36,10 @@
 		<div class="kicker">VeriScan control room / 04</div>
 		<h1>Shape the signal.</h1>
 		<p class="lede">Tune how the live dashboard captures and weighs signals. Changes are saved on this device and apply the next time the dashboard opens.</p>
+		<section class="settings-card">
+			<h2>Appearance</h2><p class="card-copy">Set the visual mode and primary accent for every page.</p>
+			<div class="appearance-grid"><div class="appearance-control"><span>Theme mode</span><label class="switch"><input id="themeMode" type="checkbox"><span class="slider"></span></label></div><label class="appearance-control"><span>Primary color</span><input id="primaryColor" type="color" value="#38bdf8" aria-label="Primary color"></label></div>
+		</section>
 		<section class="settings-card">
 			<h2>Interface design</h2><p class="card-copy">Choose the visual language used across the landing page, dashboard, assistant, and video analysis views.</p>
 			<div class="setting select-row"><div><div class="setting-heading"><label for="designSelect">Design theme</label></div><p class="setting-description">Skeuomorphic is the default. Changes appear across the app after navigation or refresh.</p></div><select id="designSelect"><option value="skeuo">Skeuomorphic</option><option value="glass">Glassmorphism</option><option value="jarvis">JARVIS Interface</option><option value="terminal">Terminal Green</option></select></div>
@@ -56,6 +64,8 @@
 		const cameraFps = document.getElementById('cameraFps');
 		const cameraResolution = document.getElementById('cameraResolution');
 		const designSelect = document.getElementById('designSelect');
+		const themeMode = document.getElementById('themeMode');
+		const primaryColor = document.getElementById('primaryColor');
 		const status = document.getElementById('settingsStatus');
 		volume.value = localStorage.getItem('veriscan-volume-sensitivity') || '3';
 		pitch.value = localStorage.getItem('veriscan-pitch-sensitivity') || '3';
@@ -63,6 +73,8 @@
 		cameraFps.value = localStorage.getItem('veriscan-camera-fps') || '0';
 		cameraResolution.value = localStorage.getItem('veriscan-camera-resolution') || '640x480';
 		designSelect.value = localStorage.getItem('veriscan-design') || 'skeuo';
+		themeMode.checked = (localStorage.getItem('veriscan-theme') || 'dark') === 'light';
+		primaryColor.value = localStorage.getItem('veriscan-primary') || '#38bdf8';
 
 		function updateLabels() { document.getElementById('volumeSensitivityValue').textContent = `${Number(volume.value).toFixed(1)}x`; document.getElementById('pitchSensitivityValue').textContent = `${Number(pitch.value).toFixed(1)}x`; }
 		function save(key, value) { localStorage.setItem(key, value); status.textContent = 'Saved. Open the dashboard to apply camera changes.'; }
@@ -72,6 +84,8 @@
 		cameraFps.addEventListener('change', () => save('veriscan-camera-fps', cameraFps.value));
 		cameraResolution.addEventListener('change', () => save('veriscan-camera-resolution', cameraResolution.value));
 		designSelect.addEventListener('change', () => { save('veriscan-design', designSelect.value); document.documentElement.dataset.design = designSelect.value; });
+		themeMode.addEventListener('change', () => { localStorage.setItem('veriscan-theme', themeMode.checked ? 'light' : 'dark'); window.location.reload(); });
+		primaryColor.addEventListener('change', () => { localStorage.setItem('veriscan-primary', primaryColor.value); window.location.reload(); });
 		updateLabels();
 	</script>
 	<script src="/static/sidepanel.js"></script>

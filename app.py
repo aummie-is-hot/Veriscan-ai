@@ -88,6 +88,17 @@ def settings():
 def info():
     return render_template('Info.html')
 
+@app.route('/insights')
+@app.route('/INSIGHTS')
+def insights():
+    latest_report = None
+    authenticated = bool(session.get('user_id'))
+    if authenticated:
+        database = get_database()
+        latest_report = database.execute('SELECT headline, summary, stress_score, sample_count, created_at FROM session_reports WHERE user_id = ? ORDER BY id DESC LIMIT 1', (session['user_id'],)).fetchone()
+        database.close()
+    return render_template('insights.html', latest_report=latest_report, authenticated=authenticated)
+
 @app.route('/login', methods=['GET', 'POST'])
 @app.route('/LOGIN', methods=['GET', 'POST'])
 def login():

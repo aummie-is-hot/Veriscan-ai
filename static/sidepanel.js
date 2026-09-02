@@ -70,7 +70,7 @@
 			<a href="/assistant" data-route="/assistant"><span class="nav-icon">&#9673;</span><span class="nav-text">Assistant</span></a>
 			<a href="/upload" data-route="/upload"><span class="nav-icon">&#8593;</span><span class="nav-text">Video analysis</span></a>
 			<a href="/settings" data-route="/settings"><span class="nav-icon">&#9881;</span><span class="nav-text">Settings</span></a>
-			<a href="/#insights"><span class="nav-icon">&#9733;</span><span class="nav-text">Latest insights</span></a>
+			<a href="/insights" data-route="/insights"><span class="nav-icon">&#9733;</span><span class="nav-text">Latest insights</span></a>
 			<a href="/info" data-route="/info"><span class="nav-icon">&#8505;</span><span class="nav-text">How it works</span></a>
 			<a href="/login" data-route="/login"><span class="nav-icon">&#8594;</span><span class="nav-text">Log in</span></a>
 			<a href="/create-account" data-route="/create-account"><span class="nav-icon">&#43;</span><span class="nav-text">Create account</span></a>
@@ -79,11 +79,6 @@
 			<a href="/app#metrics"><span class="nav-icon">&#8943;</span><span class="nav-text">Signal metrics</span></a>
 		</nav>
 		<div class="side-panel-account" aria-live="polite"><span class="account-dot"></span><span class="account-text">Guest mode</span></div>
-		<div class="side-panel-appearance">
-			<div class="side-panel-label">Appearance</div>
-			<label class="setting-row"><span class="nav-icon">&#9788;</span><span class="nav-text">Light theme</span><input class="theme-switch" type="checkbox" aria-label="Use light theme"></label>
-			<label class="setting-row"><span class="nav-icon">&#9679;</span><span class="nav-text">Primary color</span><input class="color-picker" type="color" value="${savedColor}" aria-label="Choose primary color"></label>
-		</div>
 		<a class="side-panel-landing" href="/"><span class="nav-icon">&#8592;</span><span class="nav-text">Back to landing</span></a>
 	`;
 
@@ -140,7 +135,6 @@
 		.nav-icon { display: inline-grid; place-items: center; width: 17px; color: var(--primary); font-size: .9rem; flex: 0 0 17px; }
 		.side-panel-account { display: flex; align-items: center; gap: 9px; margin: 20px 14px 0; color: var(--muted); font: 500 .65rem 'DM Mono', monospace; white-space: nowrap; overflow: hidden; }
 		.account-dot { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 8px var(--primary); }
-		.side-panel-appearance { margin-top: 14px; }
 		.setting-row { cursor: pointer; }
 		.setting-row input { margin-left: auto; }
 		.theme-switch { accent-color: var(--primary); width: 16px; height: 16px; }
@@ -152,20 +146,14 @@
 		.side-panel.collapsed .side-panel-brand, .side-panel.collapsed .side-panel-label, .side-panel.collapsed .nav-text { display: none; }
 		.side-panel.collapsed .side-panel-account { justify-content: center; margin-left: 0; margin-right: 0; }
 		.side-panel.collapsed .account-text { display: none; }
-		.side-panel.collapsed .side-panel-appearance .side-panel-label, .side-panel.collapsed .side-panel-appearance .nav-text { display: none; }
-		.side-panel.collapsed .side-panel-appearance .setting-row { justify-content: center; padding-left: 0; padding-right: 0; }
-		.side-panel.collapsed .side-panel-appearance .setting-row input { margin-left: 0; }
-		.side-panel.collapsed .side-panel-appearance .theme-switch { display: none; }
 		.side-panel.collapsed .side-panel-nav a, .side-panel.collapsed .side-panel-landing { justify-content: center; padding-left: 0; padding-right: 0; }
-		@media (max-width: 760px) { body, body.panel-collapsed { padding: 86px 16px 24px; } .side-panel { inset: 0 0 auto; width: 100%; height: 68px; padding: 0 16px; flex-direction: row; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-color); } .side-panel-brand { padding: 0; } .side-panel-toggle { top: 20px; right: 16px; } .side-panel-nav, .side-panel-account, .side-panel-appearance, .side-panel-landing { display: none; } .side-panel:not(.collapsed) .side-panel-nav { position: absolute; top: 68px; left: 0; right: 0; display: flex; gap: 4px; padding: 10px 12px; background: var(--surface, #101a1c); border-bottom: 1px solid var(--border-color); } .side-panel:not(.collapsed) .side-panel-label { display: none; } .side-panel:not(.collapsed) .side-panel-nav a { flex: 1; justify-content: center; padding: 0 8px; font-size: .7rem; } .side-panel:not(.collapsed) .side-panel-appearance { position: absolute; top: 111px; right: 12px; display: flex; gap: 4px; } .side-panel:not(.collapsed) .side-panel-appearance .side-panel-label { display: none; } .side-panel:not(.collapsed) .side-panel-appearance .setting-row { min-height: 34px; padding: 0 8px; background: var(--surface, #101a1c); } .side-panel:not(.collapsed) .side-panel-appearance .setting-row .nav-text { display: none; } }
+		@media (max-width: 760px) { body, body.panel-collapsed { padding: 86px 16px 24px; } .side-panel { inset: 0 0 auto; width: 100%; height: 68px; padding: 0 16px; flex-direction: row; align-items: center; border-right: 0; border-bottom: 1px solid var(--border-color); } .side-panel-brand { padding: 0; } .side-panel-toggle { top: 20px; right: 16px; } .side-panel-nav, .side-panel-account, .side-panel-landing { display: none; } .side-panel:not(.collapsed) .side-panel-nav { position: absolute; top: 68px; left: 0; right: 0; display: flex; gap: 4px; padding: 10px 12px; background: var(--surface, #101a1c); border-bottom: 1px solid var(--border-color); } .side-panel:not(.collapsed) .side-panel-label { display: none; } .side-panel:not(.collapsed) .side-panel-nav a { flex: 1; justify-content: center; padding: 0 8px; font-size: .7rem; } }
 	`;
 
 	document.head.appendChild(styles);
 	document.body.prepend(panel);
 
 	const toggle = panel.querySelector('.side-panel-toggle');
-	const themeSwitch = panel.querySelector('.theme-switch');
-	const colorPicker = panel.querySelector('.color-picker');
 	const isMobile = window.matchMedia('(max-width: 760px)').matches;
 	const savedPanelState = localStorage.getItem('veriscan-panel-collapsed');
 	const startCollapsed = isMobile || savedPanelState === 'true';
